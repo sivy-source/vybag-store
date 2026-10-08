@@ -11,10 +11,6 @@ Ubah app/page.jsx supaya daftar produk diambil dari tabel "produk" di Supabase, 
 
 Tampilkan produk dengan komponen KartuProduk yang sudah ada, tanpa mengubah tampilannya. Kalau gagal mengambil data, tampilkan pesan error yang jelas di halaman. Kalau tabel kosong, tampilkan tulisan "Belum ada produk". Hapus CatatanBelumAktif dari halaman ini.
 **Hasil:**
-Saya sedang menjalankan npm run build untuk memverifikasi bahwa perubahan kode dan proses build Next.js berjalan tanpa kendala. Saya akan menunggu hasilnya selesai.
-
-Fitur US-01: Katalog dari database telah selesai dikerjakan sesuai aturan pada AGENTS.md dan kriteria pada docs/user-stories.md.
-
 File yang Dibuat / Diubah
 lib/supabase/server.js (Baru)
 Membuat koneksi Supabase di sisi server menggunakan createClient dari @supabase/supabase-js.
@@ -30,16 +26,6 @@ Menampilkan tulisan "Belum ada produk" jika tabel kosong.
 Menghapus komponen CatatanBelumAktif dan import data contoh produkContoh.
 .env.local (Diperbaiki formatnya)
 Merapikan tanda petik yang tidak tertutup agar parsing environment variable berjalan normal.
-Cara Mengetes
-Jalankan development server:
-powershell
-npm run dev
-Buka http://localhost:3000 di browser.
-Periksa hal-hal berikut:
-Daftar produk dari tabel produk di Supabase (misalnya Sling Bag) tampil dengan kartu foto, kategori, nama, dan harga dalam format rupiah.
-Komponen CatatanBelumAktif ("Masih data contoh...") sudah tidak muncul lagi.
-Bila data di tabel produk kosong, akan muncul tulisan "Belum ada produk".
-Bila koneksi atau query database bermasalah (misalnya SUPABASE_SECRET_KEY salah/dikosongkan sementara), muncul pesan error yang jelas pada halaman.
 
 **Perbaikan:**
 
@@ -104,17 +90,91 @@ Pesan chat sudah otomatis terisi nama dan harga produk dalam format rupiah (misa
 ## US-04 Login admin
 
 **Prompt:**
+Baca AGENTS.md bagian aturan keamanan dan docs/user-stories.md bagian US-04.
 
+Buat login admin memakai Supabase Auth (email dan password) dengan @supabase/ssr dan cookie, memakai SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY. Login diproses dengan Server Action di app/admin/actions.js dan disambungkan ke form di app/admin/login/page.jsx. Login berhasil diarahkan ke /admin; login gagal menampilkan pesan error yang jelas di halaman login. Buat juga tombol "Keluar" di components/NavAdmin.jsx berfungsi: mengakhiri sesi lalu kembali ke /admin/login. Jangan ubah tampilan. Hapus CatatanBelumAktif dari halaman login.
 **Hasil:**
+### Cara Mengetes
 
+1. Jalankan development server:
+   ```powershell
+   npm run dev
+   ```
+2. **Uji Login Gagal:**
+   - Buka `http://localhost:3000/admin/login`.
+   - Masukkan email atau password yang salah, lalu klik **Masuk**.
+   - Halaman akan memunculkan pesan error yang jelas (misalnya *"Email atau password salah."*).
+3. **Uji Login Berhasil:**
+   - Masukkan email dan password akun admin Supabase Anda yang valid, lalu klik **Masuk**.
+   - Browser akan diarahkan ke halaman `/admin` dan sesi tersimpan dalam cookie.
+4. **Uji Tombol Keluar:**
+   - Pada navigasi admin di bagian atas, klik tombol **Keluar**.
+   - Sesi akan diakhiri dan browser akan diarahkan kembali ke `http://localhost:3000/admin/login`.
 **Perbaikan:**
 
 ## US-05 Ganti password
 
 **Prompt:**
+Baca docs/user-stories.md bagian US-05.
 
+Buat Server Action ganti password di app/admin/actions.js untuk admin yang sedang login, memakai Supabase Auth. Validasi di server: password baru minimal 8 karakter dan harus sama dengan konfirmasi. Tampilkan pesan berhasil atau pesan error yang jelas di halaman. Sambungkan ke form di app/admin/password/page.jsx tanpa mengubah tampilannya. Hapus CatatanBelumAktif dari halaman ini.
 **Hasil:**
+Viewed page.jsx:1-43
+Viewed actions.js:1-43
+Created actions.js
+Created page.jsx
+Ran command: Run npm run build (`npm run build`)
 
+Saya sedang menjalankan `npm run build` untuk memverifikasi proses build setelah penambahan Server Action ganti password dan update pada form ganti password. Saya akan menunggu proses ini selesai.
+
+Ran command: Start test server on 3001 (`npx next start -p 3001`)
+Created test_password.js
+Ran command: Execute test_password.js (`node "C:\Users\User\.gemini\antigravity\brain\6fcc7b76-de14-48fc-85a3-513f7c415fbb\scratch\test_password.js"`)
+Killed task Start test server on 3001
+
+Fitur **US-05: Ganti password** telah selesai dikerjakan sesuai aturan keamanan di [`AGENTS.md`](file:///c:/Users/User/vybag-store/AGENTS.md) dan kriteria di [`docs/user-stories.md`](file:///c:/Users/User/vybag-store/docs/user-stories.md).
+
+---
+
+### File yang Diubah
+
+1. **[`app/admin/actions.js`](file:///c:/Users/User/vybag-store/app/admin/actions.js)**
+   - Menambahkan Server Action `gantiPassword`:
+     - Membaca `password_baru` dan `konfirmasi_password` dari formulir.
+     - Memvalidasi di server bahwa password baru minimal 8 karakter.
+     - Memvalidasi di server bahwa password baru sama dengan konfirmasinya.
+     - Memeriksa sesi admin yang sedang login (`supabase.auth.getUser()`) sebelum melakukan perubahan data.
+     - Memperbarui password menggunakan `supabase.auth.updateUser({ password })`.
+     - Mengarahkan kembali ke `/admin/password` dengan parameter pesan sukses jika berhasil, atau pesan error yang jelas jika gagal / tidak valid.
+2. **[`app/admin/password/page.jsx`](file:///c:/Users/User/vybag-store/app/admin/password/page.jsx)**
+   - Menyambungkan form ke Server Action `gantiPassword` (`<form action={gantiPassword}>`).
+   - Menampilkan notifikasi sukses jika berhasil diperbarui (`text-utama`).
+   - Menampilkan notifikasi error jika validasi atau proses penggantian password gagal (`text-bahaya`).
+   - Menghapus komponen `CatatanBelumAktif`.
+   - Mempertahankan tata letak dan tampilan form yang sudah ada tanpa perubahan gaya.
+
+---
+
+### Cara Mengetes
+
+1. Jalankan development server:
+   ```powershell
+   npm run dev
+   ```
+2. Pastikan sudah login sebagai admin (melalui `/admin/login`), lalu buka halaman `http://localhost:3000/admin/password`.
+3. **Uji Validasi Password Kurang dari 8 Karakter:**
+   - Masukkan password baru kurang dari 8 karakter (misal: `12345`).
+   - Klik **Simpan password**.
+   - Halaman menampilkan pesan: *"Password baru minimal 8 karakter."*.
+4. **Uji Validasi Konfirmasi Berbeda:**
+   - Masukkan password baru minimal 8 karakter (misal: `password123`) dan konfirmasi yang berbeda (misal: `password456`).
+   - Klik **Simpan password**.
+   - Halaman menampilkan pesan: *"Password baru dan konfirmasi password tidak sama."*.
+5. **Uji Penggantian Password Berhasil:**
+   - Masukkan password baru dan konfirmasi yang sama (minimal 8 karakter).
+   - Klik **Simpan password**.
+   - Halaman menampilkan pesan sukses: *"Password berhasil diperbarui."*.
+   - Uji login kembali di `/admin/login` menggunakan password baru tersebut.
 **Perbaikan:**
 
 ## US-06 Proteksi halaman admin
